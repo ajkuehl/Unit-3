@@ -1,3 +1,5 @@
+// Ashley Kuehl, GEOG 575, Lab 2, Activity 8, 3/24/2020
+
 window.onload = function(){
   var container = d3.select("body")
     .append("svg");
@@ -17,11 +19,7 @@ window.onload = function(){
     // Assign a class (as the block name) for styling and future seletion
     .attr("class", "contianer")
     .style("background-color", "rgba(0,0,0,0.2)");
-    // append a rectangle element
-    // .append("rect")
-    // .attr("width", 800)
-    // .attr("height", 400);
-    // rect is now an operand of the container block
+
 
   // Inner Rect block
   // put a new rect in the svg
@@ -45,11 +43,10 @@ window.onload = function(){
     .style("fill", "#FFFFFF");
   // console.log(innerRect);
 
-  var numbersArray =[1,2,3];
-  var stringsArray =["one","two","three"];
-  var colorsArray =["#F00", "#0F0", "#00F"];
-
-
+  // practice arrays
+  // var numbersArray =[1,2,3];
+  // var stringsArray =["one","two","three"];
+  // var colorsArray =["#F00", "#0F0", "#00F"];
   var cityPop =[
     {
       city:'Madison',
@@ -69,9 +66,6 @@ window.onload = function(){
     }
   ]
 
-  // var dataArray = [10,20,30,40,50];
-
-
   // find the minimum value of the array
   var minPop = d3.min(cityPop, function(d){
     return d.population;
@@ -81,7 +75,6 @@ window.onload = function(){
   var maxPop = d3.max(cityPop, function(d){
     return d.population;
   });
-
 
   // scale for circles center y coordiante
   var y = d3.scaleLinear()
@@ -159,6 +152,7 @@ window.onload = function(){
     // shorthand
     .call(yAxis);
 
+
   // Create title container, add placement, and append text
   var title = container.append("text")
     .attr("class", "title")
@@ -192,6 +186,7 @@ window.onload = function(){
       return d.city;
     });
 
+
   // Create format generator
   var format = d3.format(",");
 
@@ -207,9 +202,5 @@ window.onload = function(){
     .text(function(d){
       return "Pop. " + format(d.population);
     });
-
-    // Need to clean up text still .................................
-
-
 
 };
