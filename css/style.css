@@ -19,3 +19,9 @@
   font-size: 1.5em;
   font-weight: bold;
 }
+
+.states_provinces{
+  fill:#f0f0f0;
+  stroke:#CCC;
+  stroke-width: 2px;
+}
