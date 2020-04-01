@@ -1,24 +1,4 @@
-/* Ashley Kuehl, GEOG 575, Lab 2, Activity 8, 3/24/2020 */
-
-.axis path,
-.axis line{
-  fill: none;
-  stroke: black;
-  stroke-width:1px;
-  shape-rendering: crispEdges;
-}
-
-.axis text {
-  font-family: sans-serif;
-  font-size:0.9em;
-}
-
-
-.title{
-  font-family: sans-serif;
-  font-size: 1.5em;
-  font-weight: bold;
-}
+/* Ashley Kuehl, GEOG 575, Lab 2, Activity 9, 4/1/2020 */
 
 .states_provinces{
   fill:#f0f0f0;
