@@ -2,6 +2,9 @@
 // shapefile states and counties data source census.gov
 // attribute data source 2019 County Health Rankings and Roadmap Data https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation
 
+
+
+
 // begin script when window loads
 window.onload = setMap();
 
@@ -23,15 +26,15 @@ function setMap(){
     states=data[1];
     wi=data[2];
     console.log(csvData);
-    console.log(states);
-    console.log(wi);
+    // console.log(states);
+    // console.log(wi);
 
     // translate WI topojson within callback function and assign to new variable
     // note what the objects are labeled in the topojson file and reference in code below
     var statesProvinces = topojson.feature(states, states.objects.midwest),
         wiCounties = topojson.feature(wi, wi.objects.wi_counties).features;//adding features array at the end
     // examine results under new variable name
-    console.log(statesProvinces);
+    // console.log(statesProvinces);
     console.log(wiCounties);
 
     // add states and provinces to map
@@ -46,7 +49,9 @@ function setMap(){
       .enter()
       .append("path")
       .attr("class", function(d){
-        return"counties" + d.properties.adm1_code;
+        return"counties" + d.properties.name;
+        // return"counties" + d.properties.adm1_code;
+        // ............. confused by this
       })
       .attr("d", path);
   };
