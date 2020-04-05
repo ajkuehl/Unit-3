@@ -17,8 +17,8 @@ function setMap(){
 
   // ...Map, projection, path, and que blocks
   // map frame dimensions
-  var width=960,
-      height =650;
+  var width= window.innerWidth * 0.5,
+      height =460;
 
   // create new svg container for the map
   var map = d3.select("body")
@@ -30,10 +30,10 @@ function setMap(){
    // Create projection generator
    // Albers equal area projection centered on WI, https://projectionwizard.org/
    var projection =d3.geoAlbers()
-      .center([0,27])//center coordinates
-      .rotate([88, -18, 0])//angle
+      .center([-.65,26.75])//center coordinates
+      .rotate([89, -18, 0])//angle
       .parallels([35,45])//using secant case
-      .scale(5000)
+      .scale(4250)
       .translate([width/2, height/2]);//keeps map centered in svg container
 
   // create path generator
@@ -67,7 +67,7 @@ function setMap(){
     csvData=data[0];
     states=data[1];
     wi=data[2];
-    console.log(csvData);
+    // console.log(csvData);
     // console.log(states);
     // console.log(wi);
 
@@ -79,7 +79,7 @@ function setMap(){
         wiCounties = topojson.feature(wi, wi.objects.wi_counties_1).features;//adding features array at the end
     // examine results under new variable name
     // console.log(statesProvinces);
-    console.log(wiCounties);
+    // console.log(wiCounties);
 
     // add states and provinces to map
     var states_provinces = map.append("path")
@@ -94,6 +94,9 @@ function setMap(){
 
     // add enumeration units to the map
     setEnumerationUnits(wiCounties,map,path,colorScale);
+
+    // add coordinated visualization  to the map
+    setChart(csvData, colorScale);
 
   };//end of callback function
 };//end of setMap()
@@ -140,7 +143,13 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     })
     .attr("d", path)
     .style("fill", function(d){
-      return colorScale(d.properties[expressed]);
+      // return colorScale(d.properties[expressed]);
+      var value = d.properties[expressed];
+      if(value){
+        return colorScale(d.properties[expressed]);
+      } else {
+        return "#ccc";
+      }
     });
 };
 
@@ -177,6 +186,122 @@ function makeColorScale(data){
 
   return colorScale;
   // console.log(colorScale.quantiles());
+};
+
+// function to creted coordinated bar chart
+// getting two svg containers and don't know why.................................
+function setChart(csvData, colorScale){
+  // chart frame dimensions
+  var chartWidth = window.innerWidth * 0.425,
+      chartHeight = 460,
+      leftPadding = 25,
+      rightPadding = 2,
+      topBottomPadding = 5,
+      chartInnerWidth = chartWidth - leftPadding - rightPadding,
+      chartInnerHeight = chartHeight - topBottomPadding *2,
+      translate = "translate(" + leftPadding + "," +topBottomPadding + ")";
+
+  // create a second svg element to hold the bar chart
+  var chart = d3.select("body")
+      .append("svg")
+      .attr("width",chartWidth)
+      .attr("height",chartHeight)
+      .attr("class","chart");
+
+  var chartBackground = chart.append("rect")
+      .attr("class", "chartBackground")
+      .attr("width", chartInnerWidth)
+      .attr("height", chartInnerHeight)
+      .attr("transform", translate);
+
+  // create a scale to size bars proportionally to frame
+  var yScale = d3.scaleLinear()
+      .range([463,0])
+      .domain([0, 100]);
+      // .range([0, chartHeight])
+      // .domain([0,105]);
+
+  // set bars for each county
+  // var bars = chart.selectAll(".bars")
+  var bars = chart.selectAll(".bar")
+      .data(csvData)
+      .enter()
+      .append("rect")
+      // reverse order (largest to smallest) by switching a and b
+      .sort(function(a,b){
+        return b[expressed]-a[expressed]
+      })
+      .attr("class", function(d){
+        return "bar " + d.GEOID;
+      })
+      .attr("width", chartInnerWidth / csvData.length-1)
+      .attr("x", function(d,i){
+        return i * (chartInnerWidth/csvData.length) + leftPadding;
+      })
+      .attr("height", function(d){
+        return 463 - yScale(parseFloat(d[expressed]));
+      })
+      .attr("y", function(d){
+        return yScale(parseFloat(d[expressed])) + topBottomPadding;
+      })
+      .style("fill", function(d){
+        return colorScale(d[expressed]);
+      });
+      // create chart title with a text element
+  var chartTitle = chart.append("text")
+      .attr("x", 40)
+      .attr("y", 40)
+      .attr("class", "chartTitle")
+      // change string to match data........................................................
+      .text("Number of Variables "+ expressed[3] + " in each county");
+
+  // create vertical axis generator
+  var yAxis = d3.axisLeft()
+      .scale(yScale);
+
+  // place axis
+  var axis = chart.append("g")
+      .attr("class", "axis")
+      .attr("transform", translate)
+      .call(yAxis);
+
+  // create frame for chart border
+  var chartFrame = chart.append("rect")
+      .attr("class", "chartFrame")
+      .attr("width", chartInnerWidth)
+      .attr("height", chartInnerHeight)
+      .attr("transform", translate);
+
+  // annotate bars with attribute value text.................likely not want to keep
+  var numbers = chart.selectAll(".numbers")
+      .data(csvData)
+      .enter()
+      .append("text")
+      .sort(function(a, b){
+        return a[expressed]-b[expressed]
+      })
+      .attr("class", function(d){
+        return "numbers " + d.GEOID;
+      })
+      .attr("text-anchor", "middle")
+      .attr("x", function(d,i){
+        var fraction = chartWidth/csvData.length;
+        return i  * fraction + (fraction - 1)/2;
+      })
+      .attr("y", function(d){
+        return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+      })
+      .text(function(d){
+        return d[expressed];
+      });
+
+  // // create chart title with a text element
+  // var chartTitle = chart.append("text")
+  //     .attr("x", 20)
+  //     .attr("y", 40)
+  //     .attr("class", "chartTitle")
+  //     // change string to match data........................................................
+  //     .text("Number of Variables "+ expressed[3] + " in each county");
 };
 
 })(); //last line
