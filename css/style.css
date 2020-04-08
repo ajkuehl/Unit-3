@@ -20,7 +20,7 @@
 
 .chart {
   float: right;
-  martin: 7px 20px 0 0;
+  margin: 8px 20px 0 0;
 }
 
 .chartTitle{
@@ -54,10 +54,11 @@
   fill:#999;
 }
 
-.numbers {
+/* would keep if annotaing bar chart with numbers */
+/* .numbers {
   fill: white;
   font-family: sans-serif;
-}
+} */
 
 .chartTitle{
   font-family: sans-serif;

@@ -1,4 +1,4 @@
-GEOID,NAME,Fair/Poor Health_%,Adult Smokers_%,Adult Obese_%,PhysicallyInactive_%,With Access To Exercise Opportunities_%,Excessive Drinking_%,Long Commute - Drives Alone_%
+GEOID,NAME,County Population % in Poor Health,Adult Smokers_%,Adult Obese_%,PhysicallyInactive_%,With Access To Exercise Opportunities_%,Excessive Drinking_%,Long Commute - Drives Alone_%
 55001,Adams,0,0,0,0,0,0,0
 55003,Ashland,16,17,33,23,64,23,15
 55005,Barron,14,16,34,22,74,24,19
