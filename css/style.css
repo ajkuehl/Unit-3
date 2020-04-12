@@ -6,7 +6,6 @@
   stroke-width: 2px;
 }
 
-/* not showing up for some reason */
 .counties {
   stroke: #000;
   stroke-width: 0.5px;
@@ -23,11 +22,11 @@
   margin: 8px 20px 0 0;
 }
 
-.chartTitle{
+/* .chartTitle{
   font-family: sans-serif;
   font-size: 1.5em;
   font-weight: bold;
-}
+} */
 
 .chartBackground{
   fill: rgba(128,128,128,.2);
@@ -62,7 +61,7 @@
 
 .chartTitle{
   font-family: sans-serif;
-  font-size: 1.5em;
+  font-size: 1em;
   font-weight: bold;
 }
 
@@ -72,7 +71,7 @@
   left: 40px;
   z-index: 10;
   font-family: sans-serif;
-  font-size: 1em;
+  font-size: .8em;
   font-weight: bold;
   padding: 2px;
   border: 1px solid #999;

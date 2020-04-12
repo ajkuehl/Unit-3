@@ -6,7 +6,8 @@
 (function(){
 
 // pseudo-global variables
-var attrArray = ["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"]; //List of atttributes
+var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
+// var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 var expressed = attrArray[0]; // initial attribute on dislplay
 
 // chart frame dimensions
@@ -57,7 +58,7 @@ function setMap(){
   // use Promise.all to parallelize asynchronous data loading
   var promises = [];
   // load atttributes from CSV file
-  promises.push(d3.csv("data/WI_Health_by_County.csv"));
+  promises.push(d3.csv("data/WI_Health_by_County_2.csv"));//................changed csv data here
   // load background spatial Data
   promises.push(d3.json("data/midwest.topojson"));
   // load choropleth spatial Data
@@ -68,7 +69,7 @@ function setMap(){
   // initial shapefiles exported as topojson files using mapshaper to limit file size
   // note, before loading topojson files, shapefiles should have EPSG:4326/WGS 84 coordinate reference sys
   // d3.cvs & d3.json are ajax methods
-  var promises = [d3.csv("data/WI_Health_by_County.csv"),
+  var promises = [d3.csv("data/WI_Health_by_County_2.csv"),//................changed csv data here
                   d3.json("data/midwest.topojson"),
                   d3.json("data/wi_counties_2.topojson")
                 ];
@@ -109,7 +110,9 @@ function setMap(){
 
 
 function joinData(wiCounties, csvData){
-  var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
+  var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
+
+  // var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 
   // loop through csv to assign each set of csv attribute values to geojson region
   for (var i=0; i<csvData.length; i++){
@@ -148,10 +151,14 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     .style("fill", function(d){
       var value = d.properties[expressed];
       if(value){
-        return colorScale(d.properties[expressed]);
+        // return colorScale(d.properties[expressed]);
+        return colorScale(value);
       } else {
         return "#ccc";
       }
+    })
+    .on("mouseover", function(d){
+      highlight(d.properties);
     });
 };
 
@@ -230,6 +237,8 @@ function changeAttribute(attribute, csvData){
 
   // Step 3: Recolor each enumeration unit on the map
   var counties = d3.selectAll(".counties")
+    .transition()
+    .duration(1000)//milliseconds/1 second
     .style("fill", function(d){
       var value = d.properties[expressed];
       if (value) {
@@ -244,25 +253,20 @@ function changeAttribute(attribute, csvData){
     // Step 4: re-sort
     .sort(function(a, b){
       return b[expressed] - a[expressed];
-    });
+    })
+    .transition()// add animation
+    .delay(function(d, i){
+      return i *20// delays an additional 20 milliseconds for each bar
+    })
+    .duration(500);
+
   updateChart(bars,csvData.length,colorScale)
 };// end of change Attribute()
 
 
 // function to creted coordinated bar chart
 function setChart(csvData, colorScale){
-  // chart frame dimensions ............................now part of global variable
-  // var chartWidth = window.innerWidth * 0.425,
-  //     chartHeight = 470,
-  //     leftPadding = 25,
-  //     rightPadding = 2,
-  //     topBottomPadding = 5,
-  //     chartInnerWidth = chartWidth - leftPadding - rightPadding,
-  //     chartInnerHeight = chartHeight - topBottomPadding *1,
-  //     translate = "translate(" + leftPadding + "," +topBottomPadding + ")";
 
-  // create a second svg element to hold the bar chart
-  // getting two svg containers and don't know why
   var chart = d3.select("body")
       .append('svg')
       .attr("width",chartWidth)
@@ -274,12 +278,6 @@ function setChart(csvData, colorScale){
       .attr("width", chartInnerWidth)
       .attr("height", chartInnerHeight)
       .attr("transform", translate);
-
-  // // create a scale to size bars proportionally to frame.................now part of global variable
-  // var yScale = d3.scaleLinear()
-  //     .range([463,0])
-  //     .domain([0, 35]);
-
 
   // set bars for each county
   var bars = chart.selectAll(".bar")
@@ -293,10 +291,10 @@ function setChart(csvData, colorScale){
       .attr("class", function(d){
         return "bar " + d.GEOID;
       })
-      .attr("width", chartInnerWidth / csvData.length-1);
+      .attr("width", chartInnerWidth / csvData.length-1)
+      .on("mouseover", highlight);//passing the highlight function as a parameter b/c already revercing data/properties above
 
-
-      // create chart title with a text element
+  // create chart title with a text element
   var chartTitle = chart.append("text")
       .attr("x", 40)
       .attr("y", 40)
@@ -351,6 +349,16 @@ function updateChart(bars,n,colorScale){
   var chartTitle = d3.select(".chartTitle")
     .text(expressed);
 };
+
+// function to highlight enumeration untis and bars
+function highlight(props){
+  // change stroke
+  var selected = d3.selectAll("." + props.GEOID)// work on this............................
+    .style("stroke", "blue")
+    .style("stroke-width", "2");
+};
+
+
 
 // };
 })(); //last line
