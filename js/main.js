@@ -1,4 +1,4 @@
-// Ashley Kuehl, D3 Lab, Activity 10
+// Ashley Kuehl, D3 Lab, Activity 11
 // shapefile states and counties data source census.gov
 // attribute data source 2019 County Health Rankings and Roadmap Data https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation
 
@@ -49,8 +49,6 @@ function setMap(){
   promises.push(d3.json("data/wi_counties_2.topojson"));
 
 
-  Promise.all(promises).then(callback);
-
   // promise.all method used to load multiple data sets at once with a single callback function
   // initial shapefiles exported as topojson files using mapshaper to limit file size
   // note, before loading topojson files, shapefiles should have EPSG:4326/WGS 84 coordinate reference sys
@@ -94,6 +92,10 @@ function setMap(){
 
     // add coordinated visualization  to the map
     setChart(csvData, colorScale);
+
+    // add dropdown menu..........................unsure what to do here
+    createDropdown();
+
   };//end of callback function
 };//end of setMap()
 
@@ -124,6 +126,36 @@ function joinData(wiCounties, csvData){
   return wiCounties;
 };
 
+// ...............................................................unsure where to put this. set last and there is a cope error. Needs to be set upbove described variables...........................
+//function to create a dropdown menu for attribute selection
+function createDropdown(){
+  // add select element
+  var dropdown = d3.select("body")
+    .append("select")
+    .attr("class", "dropdown");
+
+  // add initial option
+  var titleOption = dropdown.append("option")
+    .attr("class", "titleOption")
+    .attr("disabled", "true")
+    .text("Select Attribute");
+
+  // add attribute name option
+  var attrOptions = dropdown.selectAll("attrOptions")
+    .data(attrArray)
+    .enter()
+    .append("option")
+    .attr("value", function(d){ return d })
+    .text(function(d){ return d });
+};
+
+
+
+
+
+
+
+
 function setEnumerationUnits(wiCounties, map, path, colorScale){
   // add WI counties to map
   var counties = map.selectAll(".counties")
@@ -131,7 +163,8 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     .enter()
     .append("path")
     .attr("class", function(d){
-      return"counties" + d.properties.GEOID;
+      return "counties" + d.properties.GEOID;
+      // return "counties " + d.properties.GEOID; .............. not working for some reason
     })
     .attr("d", path)
     .style("fill", function(d){
@@ -289,5 +322,4 @@ function setChart(csvData, colorScale){
 
 
 };
-
 })(); //last line
