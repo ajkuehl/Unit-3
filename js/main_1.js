@@ -22,7 +22,7 @@ var chartWidth = window.innerWidth * 0.425,
 // create a scale to size bars propotionally to frame for axisLeft
 var yScale = d3.scaleLinear()
     .range([463,0])
-    .domain([0, 35]);
+    .domain([0, 110]);//may need to make this higher?.................................
 
 // begin script when window loads
 window.onload = setMap();
@@ -79,10 +79,6 @@ function setMap(){
     csvData=data[0];
     states=data[1];
     wi=data[2];
-    // console.log(csvData);
-    // console.log(states);
-    // console.log(wi);
-
 
     // translate WI topojson within callback function and assign to new variable
     // note what the objects are labeled in the topojson file and reference in code below
@@ -104,15 +100,10 @@ function setMap(){
 
     // add enumeration units to the map
     setEnumerationUnits(wiCounties,map,path,colorScale);
-
     // add coordinated visualization  to the map
     setChart(csvData, colorScale);
-
     // add dropdown menu
     createDropdown(csvData);
-
-    // changeAttribute(attribute, csvData);.............should this be here?
-
   };//end of callback function
 };//end of setMap()
 
@@ -251,47 +242,24 @@ function changeAttribute(attribute, csvData){
   // Resort, resize and recolor each bar on the bar chart
   var bars = d3.selectAll(".bar")
     // Step 4: re-sort
-    .sort(function(a,b){
+    .sort(function(a, b){
       return b[expressed] - a[expressed];
     });
-  updateChart(bars,csvData.length,colorScale);
-
-    .attr("x", function(d,i){
-      return i * (chartInnerWidth/csvData.length) + leftPadding;
-    })
-    // Step 5: Resize each bar on the bar chart
-    .attr("height", function(d,i){
-      return 463 - yScale(parseFloat(d[expressed]));
-    })
-    .attr("y", function(d,i){
-      return yScale(parseFloat(d[expressed])) + topBottomPadding;
-    })
-    // Step 6: Recolor each bar on the bar chart
-    .style("fill", function(d){
-      var value = d[expressed];
-      if (value){
-        return colorScale(value);
-      } else {
-        return "#ccc";
-      }
-    });
-};
-
-
-
+  updateChart(bars,csvData.length,colorScale)
+};// end of change Attribute()
 
 
 // function to creted coordinated bar chart
 function setChart(csvData, colorScale){
-  // chart frame dimensions
-  var chartWidth = window.innerWidth * 0.425,
-      chartHeight = 470,
-      leftPadding = 25,
-      rightPadding = 2,
-      topBottomPadding = 5,
-      chartInnerWidth = chartWidth - leftPadding - rightPadding,
-      chartInnerHeight = chartHeight - topBottomPadding *1,
-      translate = "translate(" + leftPadding + "," +topBottomPadding + ")";
+  // chart frame dimensions ............................now part of global variable
+  // var chartWidth = window.innerWidth * 0.425,
+  //     chartHeight = 470,
+  //     leftPadding = 25,
+  //     rightPadding = 2,
+  //     topBottomPadding = 5,
+  //     chartInnerWidth = chartWidth - leftPadding - rightPadding,
+  //     chartInnerHeight = chartHeight - topBottomPadding *1,
+  //     translate = "translate(" + leftPadding + "," +topBottomPadding + ")";
 
   // create a second svg element to hold the bar chart
   // getting two svg containers and don't know why
@@ -307,20 +275,19 @@ function setChart(csvData, colorScale){
       .attr("height", chartInnerHeight)
       .attr("transform", translate);
 
-  // create a scale to size bars proportionally to frame
-  var yScale = d3.scaleLinear()
-      .range([463,0])
-      .domain([0, 35]);
+  // // create a scale to size bars proportionally to frame.................now part of global variable
+  // var yScale = d3.scaleLinear()
+  //     .range([463,0])
+  //     .domain([0, 35]);
 
 
   // set bars for each county
-  // var bars = chart.selectAll(".bars")
   var bars = chart.selectAll(".bar")
       .data(csvData)
       .enter()
       .append("rect")
       // reverse order (largest to smallest) by switching a and b
-      .sort(function(a,b){
+      .sort(function(a, b){
         return b[expressed]-a[expressed]
       })
       .attr("class", function(d){
@@ -328,27 +295,12 @@ function setChart(csvData, colorScale){
       })
       .attr("width", chartInnerWidth / csvData.length-1);
 
-      // Below this is old script, taken about because we added some global variables at the the top.........................
-      // .attr("x", function(d,i){
-      //   return i * (chartInnerWidth/csvData.length) + leftPadding;
-      // })
-      // .attr("height", function(d){
-      //   return 463 - yScale(parseFloat(d[expressed]));
-      // })
-      // .attr("y", function(d){
-      //   return yScale(parseFloat(d[expressed])) + topBottomPadding;
-      // })
-      // .style("fill", function(d){
-      //   return colorScale(d[expressed]);
-      // });
 
       // create chart title with a text element
   var chartTitle = chart.append("text")
       .attr("x", 40)
       .attr("y", 40)
       .attr("class", "chartTitle")
-      // title text of what variable is expressed at the time
-      .text(expressed);
 
   // create vertical axis generator
   var yAxis = d3.axisLeft()
@@ -372,29 +324,33 @@ function setChart(csvData, colorScale){
 }; // end of setChart()
 
 
-  // // annotate bars with attribute value text....Cool idea, will likely not want to keep, very cumbersome
-  // var numbers = chart.selectAll(".numbers")
-  //     .data(csvData)
-  //     .enter()
-  //     .append("text")
-  //     .sort(function(a, b){
-  //       return a[expressed]-b[expressed]
-  //     })
-  //     .attr("class", function(d){
-  //       return "numbers " + d.GEOID;
-  //     })
-  //     .attr("text-anchor", "middle")
-  //     .attr("x", function(d,i){
-  //       var fraction = chartWidth/csvData.length;
-  //       return i  * fraction + (fraction - 1)/2;
-  //     })
-  //     .attr("y", function(d){
-  //       return chartHeight - yScale(parseFloat(d[expressed])) + 15;
-  //     })
-  //     .text(function(d){
-  //       return d[expressed];
-  //     });
+//function to position, size and color bars in chart
+function updateChart(bars,n,colorScale){
+  // position bars
+  bars.attr("x", function(d, i){
+      return i * (chartInnerWidth / n) + leftPadding;
+    })
+    // size/Resize
+    .attr("height", function (d, i){
+      return 463 - yScale(parseFloat(d[expressed]));
+    })
+    .attr("y", function(d,i){
+      return yScale(parseFloat(d[expressed])) + topBottomPadding;
+    })
+    // color/recolor bars
+    .style("fill",function(d){
+      var value = d[expressed];
+      if(value){
+        return colorScale(value);
+      }else{
+        return "#ccc";
+      }
+    });
 
+  // title text of what variable is expressed at the time
+  var chartTitle = d3.select(".chartTitle")
+    .text(expressed);
+};
 
 // };
 })(); //last line
