@@ -161,7 +161,15 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     })
     .on("mouseover", function(d){
       highlight(d.properties);
-    });
+    })
+    .on("mouseout", function(d){
+      dehighlight(d.properties);
+    })
+    .on("mousemove", moveLabel);
+
+  // dehiglighing
+  var desc = counties.append("desc")
+    .text('{"stroke": "#000", "stroke-width": "0.5px"}');
 };
 
 // creating an equal interval color scale generator
@@ -295,7 +303,13 @@ function setChart(csvData, colorScale){
         return "bar " + "a" + d.GEOID;
       })
       .attr("width", chartInnerWidth / csvData.length-1)
-      .on("mouseover", highlight);//passing the highlight function as a parameter b/c already revercing data/properties above
+      .on("mouseover", highlight)//passing the highlight and dehighlight functions as a parameter b/c already revercing data/properties above
+      .on("mouseout", dehighlight)
+      .on("mousemove", moveLabel);
+
+  // dehighlighting
+  var desc = bars.append("desc")
+      .text('{"stroke": "none", "stroke-width": "0px"}');
 
   // create chart title with a text element
   var chartTitle = chart.append("text")
@@ -360,9 +374,79 @@ function highlight(props){
   var selected = d3.selectAll(".a" + props.GEOID)// work on this............................
     .style("stroke", "blue")
     .style("stroke-width", "2");
-    console.log(props.GEOID);
+    // console.log(props.GEOID);
+
+    setLabel(props);
 };
 
+
+// function to reset the element style on mouseout
+function dehighlight(props){
+  var selected = d3.selectAll(".a" + props.GEOID)
+    .style("stroke", function(){
+      return getStyle(this, "stroke")
+    })
+    .style("stroke-width", function(){
+      return getStyle(this,"stoke-width")
+    });
+
+  function getStyle(element, styleName){
+    var styleText = d3.select(element)
+      .select("desc")
+      .text();
+
+    var styleObject = JSON.parse(styleText);
+
+    return styleObject[styleName];
+  };
+
+  // remove label
+  d3.select(".infolabel")
+    .remove();
+};
+
+
+// function to create dynamic labele
+function setLabel(props){
+  // label content
+  var labelAttribute = "<h1>" + props[expressed] +"</h1><b>" + expressed + "</b>";
+
+  // create info label div
+  var infolabel = d3.select("body")
+    .append("div")
+    .attr("class", "infolabel")
+    .attr("id", props.GEOID + "_label")// don't understand this label
+    .html(labelAttribute);
+
+  var regionName = infolabel.append("div")
+    .attr("class", "labelname")
+    .html(props.name);
+};
+
+
+// function to move info label with mouse
+function moveLabel(){
+  // get width of label
+  var labelWidth = d3.select(".infolabel")
+      .node()
+      .getBoundingClientRect()
+      .width;
+
+  // use coordinates of mousemove event to set label coordinates
+  var x1 = d3.event.clientX + 10,
+      y1 = d3.event.clientY - 75,
+      x2 = d3.event.clientX - labelWidth - 10,
+      y2 = d3.event.clientY + 25;
+
+  // Horizontal label coordinate, testing for overflow
+  var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
+  // vertical label coordinate, testing for overflow
+  var y = d3.event.clientY < 75 ? y2 : y1;
+
+  d3.select(".infolabel")
+      .style("left", x + "px")
+      .style("top", y + "px");
+};
 
 
 // };
