@@ -145,11 +145,13 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     .enter()
     .append("path")
     .attr("class", function(d){
-      return "counties " + d.properties.GEOID;
+      // console.log("counties" + "a" + d.properties.GEOID);
+      // return "counties " + d.properties.GEOID;.......................edit to add chracter before GEOID
+      return "counties " + "a" + d.properties.GEOID;
     })
     .attr("d", path)
     .style("fill", function(d){
-      var value = d.properties[expressed];
+      var value = d.properties[expressed];//.............do I also need to edit this for highlighting
       if(value){
         // return colorScale(d.properties[expressed]);
         return colorScale(value);
@@ -289,7 +291,8 @@ function setChart(csvData, colorScale){
         return b[expressed]-a[expressed]
       })
       .attr("class", function(d){
-        return "bar " + d.GEOID;
+        // return "bar " + d.GEOID;..........................edit this line
+        return "bar " + "a" + d.GEOID;
       })
       .attr("width", chartInnerWidth / csvData.length-1)
       .on("mouseover", highlight);//passing the highlight function as a parameter b/c already revercing data/properties above
@@ -353,9 +356,11 @@ function updateChart(bars,n,colorScale){
 // function to highlight enumeration untis and bars
 function highlight(props){
   // change stroke
-  var selected = d3.selectAll("." + props.GEOID)// work on this............................
+  // var selected = d3.selectAll(props.GEOID)
+  var selected = d3.selectAll(".a" + props.GEOID)// work on this............................
     .style("stroke", "blue")
     .style("stroke-width", "2");
+    console.log(props.GEOID);
 };
 
 
