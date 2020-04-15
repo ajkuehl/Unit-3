@@ -1,4 +1,4 @@
-// Ashley Kuehl, D3 Lab, Activity 11
+// Ashley Kuehl, D3 Lab, Activity 11 4/15/2020
 // shapefile states and counties data source census.gov
 // attribute data source 2019 County Health Rankings and Roadmap Data https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation
 
@@ -7,11 +7,10 @@
 
 // pseudo-global variables
 var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
-// var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 var expressed = attrArray[0]; // initial attribute on dislplay
 
 // chart frame dimensions
-var chartWidth = window.innerWidth * 0.425,
+var chartWidth = window.innerWidth * 0.4,
     chartHeight = 470,
     leftPadding = 25,
     rightPadding = 2,
@@ -23,7 +22,7 @@ var chartWidth = window.innerWidth * 0.425,
 // create a scale to size bars propotionally to frame for axisLeft
 var yScale = d3.scaleLinear()
     .range([463,0])
-    .domain([0, 110]);//may need to make this higher?.................................
+    .domain([0, 110]);
 
 // begin script when window loads
 window.onload = setMap();
@@ -32,7 +31,7 @@ window.onload = setMap();
 function setMap(){
 
   // map frame dimensions
-  var width= window.innerWidth * 0.5,
+  var width= window.innerWidth * 0.4,
       height =460;
 
   // create new svg container for the map
@@ -58,7 +57,7 @@ function setMap(){
   // use Promise.all to parallelize asynchronous data loading
   var promises = [];
   // load atttributes from CSV file
-  promises.push(d3.csv("data/WI_Health_by_County_2.csv"));//................changed csv data here
+  promises.push(d3.csv("data/WI_Health_by_County_2.csv"));
   // load background spatial Data
   promises.push(d3.json("data/midwest.topojson"));
   // load choropleth spatial Data
@@ -69,7 +68,7 @@ function setMap(){
   // initial shapefiles exported as topojson files using mapshaper to limit file size
   // note, before loading topojson files, shapefiles should have EPSG:4326/WGS 84 coordinate reference sys
   // d3.cvs & d3.json are ajax methods
-  var promises = [d3.csv("data/WI_Health_by_County_2.csv"),//................changed csv data here
+  var promises = [d3.csv("data/WI_Health_by_County_2.csv"),
                   d3.json("data/midwest.topojson"),
                   d3.json("data/wi_counties_2.topojson")
                 ];
@@ -85,8 +84,6 @@ function setMap(){
     // note what the objects are labeled in the topojson file and reference in code below
     var statesProvinces = topojson.feature(states, states.objects.midwest),
         wiCounties = topojson.feature(wi, wi.objects.wi_counties_1).features;//adding features array at the end
-    // console.log(statesProvinces);
-    // console.log(wiCounties);
 
     // add states and provinces to map
     var states_provinces = map.append("path")
@@ -106,14 +103,14 @@ function setMap(){
     // add dropdown menu
     createDropdown(csvData);
 
+    citeData();
+
   };//end of callback function
 };//end of setMap()
 
 
 function joinData(wiCounties, csvData){
   var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
-
-  // var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 
   // loop through csv to assign each set of csv attribute values to geojson region
   for (var i=0; i<csvData.length; i++){
@@ -146,15 +143,13 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     .enter()
     .append("path")
     .attr("class", function(d){
-      // console.log("counties" + "a" + d.properties.GEOID);
-      // return "counties " + d.properties.GEOID;.......................edit to add chracter before GEOID
+      //my GEOID data starts with numbers, CSS will not allow, therefore an extra letter was added below
       return "counties " + "a" + d.properties.GEOID;
     })
     .attr("d", path)
     .style("fill", function(d){
-      var value = d.properties[expressed];//.............do I also need to edit this for highlighting
+      var value = d.properties[expressed];
       if(value){
-        // return colorScale(d.properties[expressed]);
         return colorScale(value);
       } else {
         return "#ccc";
@@ -175,12 +170,13 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
 
 // creating an equal interval color scale generator
 function makeColorScale(data){
+  // color classes set to blue hues
   var colorClasses=[
-    "#fee5d9",
-    "#fcae91",
-    "#fb6a4a",
-    "#de2d26",
-    "#a50f15"
+    "#c6dbef",
+    "#9ecae1",
+    "#6baed6",
+    "#3182bd",
+    "#08519c"
   ];
 
   // create color scale generator
@@ -211,7 +207,6 @@ function makeColorScale(data){
 };
 
 
-// ...............................................................unsure where to put this. set last and there is a cope error. Needs to be set upbove described variables...........................
 //function to create a dropdown menu for attribute selection
 function createDropdown(csvData){
   // add select element
@@ -237,9 +232,10 @@ function createDropdown(csvData){
     .text(function(d){ return d });
 };
 
-// On User Selection steps 1 -6
+
 // dropdown change listener handler. function called in the createDropdown function above.
 function changeAttribute(attribute, csvData){
+  // On User Selection steps 1 -6
   // Step 1: Change the expressed attribute
   expressed = attribute;
 
@@ -300,7 +296,7 @@ function setChart(csvData, colorScale){
         return b[expressed]-a[expressed]
       })
       .attr("class", function(d){
-        // return "bar " + d.GEOID;..........................edit this line
+        // my GEOID data starts with number, added character for CSS
         return "bar " + "a" + d.GEOID;
       })
       .attr("width", chartInnerWidth / csvData.length-1)
@@ -371,12 +367,11 @@ function updateChart(bars,n,colorScale){
 // function to highlight enumeration untis and bars
 function highlight(props){
   // change stroke
-  // var selected = d3.selectAll(props.GEOID)
-  var selected = d3.selectAll(".a" + props.GEOID)// work on this............................
-    .style("stroke", "blue")
-    .style("stroke-width", "2");
+  // added character for CSS to function properly
+  var selected = d3.selectAll(".a" + props.GEOID)
+    .style("stroke", "red")
+    .style("stroke-width", "3");
     // console.log(props.GEOID);
-
     setLabel(props);
 };
 
@@ -416,12 +411,12 @@ function setLabel(props){
   var infolabel = d3.select("body")
     .append("div")
     .attr("class", "infolabel")
-    .attr("id", props.GEOID + "_label")// don't understand this label
+    .attr("id", props.GEOID + "_label")
     .html(labelAttribute);
 
   var regionName = infolabel.append("div")
     .attr("class", "labelname")
-    .html(props.name);
+    .html(props.NAME + " county");
 };
 
 
@@ -449,6 +444,18 @@ function moveLabel(){
       .style("top", y + "px");
 };
 
+// Data Source
+function citeData(){
+  var width = 200;
+  var height = 500;
 
-// };
+  // create element
+  var dataSource = d3.select("body")
+    .append("html")
+    .attr("class","dataSource")
+    .attr("width", width)
+    .attr("height", height)
+    .html("Data Source: <a href='https://www.countyhealthrankings.org/explore-health-rankings/rankings-data-documentation'>2019 County Health Rankings and Roadmap</a>");
+};
+
 })(); //last line
