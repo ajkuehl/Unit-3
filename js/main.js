@@ -6,7 +6,8 @@
 (function(){
 
 // pseudo-global variables
-var attrArray = ["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"]; //List of atttributes
+var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
+// var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 var expressed = attrArray[0]; // initial attribute on dislplay
 
 // chart frame dimensions
@@ -22,7 +23,7 @@ var chartWidth = window.innerWidth * 0.425,
 // create a scale to size bars propotionally to frame for axisLeft
 var yScale = d3.scaleLinear()
     .range([463,0])
-    .domain([0, 35]);
+    .domain([0, 110]);//may need to make this higher?.................................
 
 // begin script when window loads
 window.onload = setMap();
@@ -57,7 +58,7 @@ function setMap(){
   // use Promise.all to parallelize asynchronous data loading
   var promises = [];
   // load atttributes from CSV file
-  promises.push(d3.csv("data/WI_Health_by_County.csv"));
+  promises.push(d3.csv("data/WI_Health_by_County_2.csv"));//................changed csv data here
   // load background spatial Data
   promises.push(d3.json("data/midwest.topojson"));
   // load choropleth spatial Data
@@ -68,7 +69,7 @@ function setMap(){
   // initial shapefiles exported as topojson files using mapshaper to limit file size
   // note, before loading topojson files, shapefiles should have EPSG:4326/WGS 84 coordinate reference sys
   // d3.cvs & d3.json are ajax methods
-  var promises = [d3.csv("data/WI_Health_by_County.csv"),
+  var promises = [d3.csv("data/WI_Health_by_County_2.csv"),//................changed csv data here
                   d3.json("data/midwest.topojson"),
                   d3.json("data/wi_counties_2.topojson")
                 ];
@@ -79,10 +80,6 @@ function setMap(){
     csvData=data[0];
     states=data[1];
     wi=data[2];
-    // console.log(csvData);
-    // console.log(states);
-    // console.log(wi);
-
 
     // translate WI topojson within callback function and assign to new variable
     // note what the objects are labeled in the topojson file and reference in code below
@@ -104,21 +101,19 @@ function setMap(){
 
     // add enumeration units to the map
     setEnumerationUnits(wiCounties,map,path,colorScale);
-
     // add coordinated visualization  to the map
     setChart(csvData, colorScale);
-
     // add dropdown menu
     createDropdown(csvData);
-
-    // changeAttribute(attribute, csvData);.............should this be here?
 
   };//end of callback function
 };//end of setMap()
 
 
 function joinData(wiCounties, csvData){
-  var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
+  var attrArray = ["% in Poor Health per County","% of Adult Smokers per County","% of Adults with Obesity per County","% of Physically Inactive per County","% With Access to Exercise Opportunities per County","% Who Excessively Drink per County","% Who Drive Alone on Long Commutes"]; //List of atttributes
+
+  // var attrArray=["County Population % in Poor Health","Adult Smokers_%","Adult Obese_%","PhysicallyInactive_%","With Access To Exercise Opportunities_%","Excessive Drinking_%","Long Commute - Drives Alone_%"];
 
   // loop through csv to assign each set of csv attribute values to geojson region
   for (var i=0; i<csvData.length; i++){
@@ -151,17 +146,31 @@ function setEnumerationUnits(wiCounties, map, path, colorScale){
     .enter()
     .append("path")
     .attr("class", function(d){
-      return "counties " + d.properties.GEOID;
+      // console.log("counties" + "a" + d.properties.GEOID);
+      // return "counties " + d.properties.GEOID;.......................edit to add chracter before GEOID
+      return "counties " + "a" + d.properties.GEOID;
     })
     .attr("d", path)
     .style("fill", function(d){
-      var value = d.properties[expressed];
+      var value = d.properties[expressed];//.............do I also need to edit this for highlighting
       if(value){
-        return colorScale(d.properties[expressed]);
+        // return colorScale(d.properties[expressed]);
+        return colorScale(value);
       } else {
         return "#ccc";
       }
-    });
+    })
+    .on("mouseover", function(d){
+      highlight(d.properties);
+    })
+    .on("mouseout", function(d){
+      dehighlight(d.properties);
+    })
+    .on("mousemove", moveLabel);
+
+  // dehiglighing
+  var desc = counties.append("desc")
+    .text('{"stroke": "#000", "stroke-width": "0.5px"}');
 };
 
 // creating an equal interval color scale generator
@@ -239,6 +248,8 @@ function changeAttribute(attribute, csvData){
 
   // Step 3: Recolor each enumeration unit on the map
   var counties = d3.selectAll(".counties")
+    .transition()
+    .duration(1000)//milliseconds/1 second
     .style("fill", function(d){
       var value = d.properties[expressed];
       if (value) {
@@ -251,50 +262,22 @@ function changeAttribute(attribute, csvData){
   // Resort, resize and recolor each bar on the bar chart
   var bars = d3.selectAll(".bar")
     // Step 4: re-sort
-    .sort(function(a,b){
+    .sort(function(a, b){
       return b[expressed] - a[expressed];
-    });
-  updateChart(bars,csvData.length,colorScale);
-
-    .attr("x", function(d,i){
-      return i * (chartInnerWidth/csvData.length) + leftPadding;
     })
-    // Step 5: Resize each bar on the bar chart
-    .attr("height", function(d,i){
-      return 463 - yScale(parseFloat(d[expressed]));
+    .transition()// add animation
+    .delay(function(d, i){
+      return i *20// delays an additional 20 milliseconds for each bar
     })
-    .attr("y", function(d,i){
-      return yScale(parseFloat(d[expressed])) + topBottomPadding;
-    })
-    // Step 6: Recolor each bar on the bar chart
-    .style("fill", function(d){
-      var value = d[expressed];
-      if (value){
-        return colorScale(value);
-      } else {
-        return "#ccc";
-      }
-    });
-};
+    .duration(500);
 
-
-
+  updateChart(bars,csvData.length,colorScale)
+};// end of change Attribute()
 
 
 // function to creted coordinated bar chart
 function setChart(csvData, colorScale){
-  // chart frame dimensions
-  var chartWidth = window.innerWidth * 0.425,
-      chartHeight = 470,
-      leftPadding = 25,
-      rightPadding = 2,
-      topBottomPadding = 5,
-      chartInnerWidth = chartWidth - leftPadding - rightPadding,
-      chartInnerHeight = chartHeight - topBottomPadding *1,
-      translate = "translate(" + leftPadding + "," +topBottomPadding + ")";
 
-  // create a second svg element to hold the bar chart
-  // getting two svg containers and don't know why
   var chart = d3.select("body")
       .append('svg')
       .attr("width",chartWidth)
@@ -307,48 +290,33 @@ function setChart(csvData, colorScale){
       .attr("height", chartInnerHeight)
       .attr("transform", translate);
 
-  // create a scale to size bars proportionally to frame
-  var yScale = d3.scaleLinear()
-      .range([463,0])
-      .domain([0, 35]);
-
-
   // set bars for each county
-  // var bars = chart.selectAll(".bars")
   var bars = chart.selectAll(".bar")
       .data(csvData)
       .enter()
       .append("rect")
       // reverse order (largest to smallest) by switching a and b
-      .sort(function(a,b){
+      .sort(function(a, b){
         return b[expressed]-a[expressed]
       })
       .attr("class", function(d){
-        return "bar " + d.GEOID;
+        // return "bar " + d.GEOID;..........................edit this line
+        return "bar " + "a" + d.GEOID;
       })
-      .attr("width", chartInnerWidth / csvData.length-1);
+      .attr("width", chartInnerWidth / csvData.length-1)
+      .on("mouseover", highlight)//passing the highlight and dehighlight functions as a parameter b/c already revercing data/properties above
+      .on("mouseout", dehighlight)
+      .on("mousemove", moveLabel);
 
-      // Below this is old script, taken about because we added some global variables at the the top.........................
-      // .attr("x", function(d,i){
-      //   return i * (chartInnerWidth/csvData.length) + leftPadding;
-      // })
-      // .attr("height", function(d){
-      //   return 463 - yScale(parseFloat(d[expressed]));
-      // })
-      // .attr("y", function(d){
-      //   return yScale(parseFloat(d[expressed])) + topBottomPadding;
-      // })
-      // .style("fill", function(d){
-      //   return colorScale(d[expressed]);
-      // });
+  // dehighlighting
+  var desc = bars.append("desc")
+      .text('{"stroke": "none", "stroke-width": "0px"}');
 
-      // create chart title with a text element
+  // create chart title with a text element
   var chartTitle = chart.append("text")
       .attr("x", 40)
       .attr("y", 40)
       .attr("class", "chartTitle")
-      // title text of what variable is expressed at the time
-      .text(expressed);
 
   // create vertical axis generator
   var yAxis = d3.axisLeft()
@@ -372,28 +340,114 @@ function setChart(csvData, colorScale){
 }; // end of setChart()
 
 
-  // // annotate bars with attribute value text....Cool idea, will likely not want to keep, very cumbersome
-  // var numbers = chart.selectAll(".numbers")
-  //     .data(csvData)
-  //     .enter()
-  //     .append("text")
-  //     .sort(function(a, b){
-  //       return a[expressed]-b[expressed]
-  //     })
-  //     .attr("class", function(d){
-  //       return "numbers " + d.GEOID;
-  //     })
-  //     .attr("text-anchor", "middle")
-  //     .attr("x", function(d,i){
-  //       var fraction = chartWidth/csvData.length;
-  //       return i  * fraction + (fraction - 1)/2;
-  //     })
-  //     .attr("y", function(d){
-  //       return chartHeight - yScale(parseFloat(d[expressed])) + 15;
-  //     })
-  //     .text(function(d){
-  //       return d[expressed];
-  //     });
+//function to position, size and color bars in chart
+function updateChart(bars,n,colorScale){
+  // position bars
+  bars.attr("x", function(d, i){
+      return i * (chartInnerWidth / n) + leftPadding;
+    })
+    // size/Resize
+    .attr("height", function (d, i){
+      return 463 - yScale(parseFloat(d[expressed]));
+    })
+    .attr("y", function(d,i){
+      return yScale(parseFloat(d[expressed])) + topBottomPadding;
+    })
+    // color/recolor bars
+    .style("fill",function(d){
+      var value = d[expressed];
+      if(value){
+        return colorScale(value);
+      }else{
+        return "#ccc";
+      }
+    });
+
+  // title text of what variable is expressed at the time
+  var chartTitle = d3.select(".chartTitle")
+    .text(expressed);
+};
+
+// function to highlight enumeration untis and bars
+function highlight(props){
+  // change stroke
+  // var selected = d3.selectAll(props.GEOID)
+  var selected = d3.selectAll(".a" + props.GEOID)// work on this............................
+    .style("stroke", "blue")
+    .style("stroke-width", "2");
+    // console.log(props.GEOID);
+
+    setLabel(props);
+};
+
+
+// function to reset the element style on mouseout
+function dehighlight(props){
+  var selected = d3.selectAll(".a" + props.GEOID)
+    .style("stroke", function(){
+      return getStyle(this, "stroke")
+    })
+    .style("stroke-width", function(){
+      return getStyle(this,"stoke-width")
+    });
+
+  function getStyle(element, styleName){
+    var styleText = d3.select(element)
+      .select("desc")
+      .text();
+
+    var styleObject = JSON.parse(styleText);
+
+    return styleObject[styleName];
+  };
+
+  // remove label
+  d3.select(".infolabel")
+    .remove();
+};
+
+
+// function to create dynamic labele
+function setLabel(props){
+  // label content
+  var labelAttribute = "<h1>" + props[expressed] +"</h1><b>" + expressed + "</b>";
+
+  // create info label div
+  var infolabel = d3.select("body")
+    .append("div")
+    .attr("class", "infolabel")
+    .attr("id", props.GEOID + "_label")// don't understand this label
+    .html(labelAttribute);
+
+  var regionName = infolabel.append("div")
+    .attr("class", "labelname")
+    .html(props.name);
+};
+
+
+// function to move info label with mouse
+function moveLabel(){
+  // get width of label
+  var labelWidth = d3.select(".infolabel")
+      .node()
+      .getBoundingClientRect()
+      .width;
+
+  // use coordinates of mousemove event to set label coordinates
+  var x1 = d3.event.clientX + 10,
+      y1 = d3.event.clientY - 75,
+      x2 = d3.event.clientX - labelWidth - 10,
+      y2 = d3.event.clientY + 25;
+
+  // Horizontal label coordinate, testing for overflow
+  var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
+  // vertical label coordinate, testing for overflow
+  var y = d3.event.clientY < 75 ? y2 : y1;
+
+  d3.select(".infolabel")
+      .style("left", x + "px")
+      .style("top", y + "px");
+};
 
 
 // };

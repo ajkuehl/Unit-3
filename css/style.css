@@ -1,5 +1,32 @@
 /* Ashley Kuehl, GEOG 575, Lab 2, Activity 11, 4/15/2020 */
 
+
+#title{
+  font-family:sans-serif;
+  font-size: 50px;
+  height:55px;
+  width: 100%;
+  background: #08519c;
+  opacity: 0.8;
+  color:white;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: 15px;
+  text-shadow:3px 2px black;
+  padding: 10px 10px 10px 10px;
+  display: inline-block;
+}
+
+.dataSource{
+  font-family:sans-serif;
+  font-size: 15px;
+  opacity: 0.7;
+  color:#08519c;
+  padding: 0px 0px 0px 20px;
+  display: left;
+}
+
+
 .states_provinces{
   fill:#f0f0f0;
   stroke:#CCC;
@@ -18,15 +45,9 @@
 }
 
 .chart {
-  float: right;
-  margin: 8px 20px 0 0;
+  margin: 10px 20px 0 20px;
+  display: inline-block;
 }
-
-/* .chartTitle{
-  font-family: sans-serif;
-  font-size: 1.5em;
-  font-weight: bold;
-} */
 
 .chartBackground{
   fill: rgba(128,128,128,.2);
@@ -61,17 +82,17 @@
 
 .chartTitle{
   font-family: sans-serif;
-  font-size: 1em;
+  font-size: 1.2em;
   font-weight: bold;
 }
 
 .dropdown {
   position: absolute;
-  top: 30px;
+  top: 120px;
   left: 40px;
   z-index: 10;
   font-family: sans-serif;
-  font-size: .8em;
+  font-size: 1.2em;
   font-weight: bold;
   padding: 2px;
   border: 1px solid #999;
@@ -96,7 +117,7 @@ option {
 }
 
 .infolabel h1 {
-  margin: 0 20px 0 0;
+  margin: 0 5px 0 0;
   padding: 0;
   display: inline-block;
   line-height: 1em;
